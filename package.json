@@ -1,0 +1,12 @@
+{
+  "name": "kirana-wholesale",
+  "version": "1.0.0",
+  "private": true,
+  "description": "B2B Wholesale Engine for Kathmandu Kirana Pasals",
+  "scripts": {
+    "build:backend": "npm run build --prefix backend",
+    "start:backend": "npm run start --prefix backend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:worker": "npm run dev:worker --prefix backend"
+  }
+}
