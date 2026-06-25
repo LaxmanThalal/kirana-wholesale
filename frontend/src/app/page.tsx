@@ -105,19 +105,37 @@ export default function Home() {
     };
   }, []);
 
-  // Initial load: Fetch stores and products from backend if online
+  // Initial load: Fetch stores and products from backend, fallback to mock data if offline
   useEffect(() => {
     async function fetchData() {
       if (!isOnline) return;
       try {
-        const storeRes = await fetch(`${BACKEND_URL}/health`); // Check health first
-        if (!storeRes.ok) return;
+        const [storeRes, productRes] = await Promise.all([
+          fetch(`${BACKEND_URL}/api/stores`),
+          fetch(`${BACKEND_URL}/api/products`),
+        ]);
 
-        // Try getting products/stores if seeded
-        // Note: For now, if database is seeded, we can use our mock list as primary state 
-        // and allow reloading. In a fully populated production app we would hit API endpoints.
+        if (storeRes.ok) {
+          const storeData = await storeRes.json();
+          if (storeData.success && storeData.data.length > 0) {
+            setStores(storeData.data.map((s: any) => ({
+              ...s,
+              availableCredit: s.creditLimit - s.outstandingBalance,
+            })));
+          }
+        }
+
+        if (productRes.ok) {
+          const productData = await productRes.json();
+          if (productData.success && productData.data.length > 0) {
+            setProducts(productData.data.map((p: any) => ({
+              ...p,
+              unit: p.unit?.toUpperCase() || 'PIECE',
+            })));
+          }
+        }
       } catch (err) {
-        console.warn('Backend server not reachable. Falling back to local data.');
+        console.warn('Backend not reachable. Using local mock data.');
       }
     }
     fetchData();
